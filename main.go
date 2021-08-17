@@ -1,39 +1,21 @@
 package main
 
 import (
-	"context"
-	"github.com/Jsoneft/cos_service/constant"
 	"net/http"
 	"net/url"
-	"os"
 	"sync"
 
+	"github.com/Jsoneft/cos_service/constant"
 	"github.com/tencentyun/cos-go-sdk-v5"
 )
-
-func upload(wg *sync.WaitGroup, c *cos.Client, files <-chan string) {
-	defer wg.Done()
-	for file := range files {
-		name := "folder/" + file
-		fd, err := os.Open(file)
-		if err != nil {
-			//ERROR
-			continue
-		}
-		_, err = c.Object.Put(context.Background(), name, fd, nil)
-		if err != nil {
-			//ERROR
-		}
-	}
-}
 
 func main() {
 	u, _ := url.Parse(constant.JarvisImageUploadURL)
 	b := &cos.BaseURL{BucketURL: u}
 	c := cos.NewClient(b, &http.Client{
 		Transport: &cos.AuthorizationTransport{
-			SecretID:  os.Getenv("SECRETID"),
-			SecretKey: os.Getenv("SECRETKEY"),
+			SecretID:  constant.SecretID,
+			SecretKey: constant.SecretKey,
 		},
 	})
 	// 多线程批量上传文件
