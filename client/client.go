@@ -2,17 +2,15 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
-
-	"golang.org/x/sync/errgroup"
 
 	"github.com/Jsoneft/cos_service/constant"
 	"github.com/tencentyun/cos-go-sdk-v5"
@@ -22,7 +20,7 @@ import (
 
 // Client is the COS service implement.
 type Client interface {
-	ParallelUpload(ctx context.Context, files []string) error
+	Upload(ctx context.Context, files []string) ([]string, error)
 }
 
 type client struct {
@@ -46,28 +44,28 @@ var New = func() Client {
 	}
 }
 
-// ParallelUpload 并行上传 如某一个行为出错 立即停掉其他的上传并返回改次上传错误。
-func (c *client) ParallelUpload(ctx context.Context, files []string) ([]string, error) {
-	g, subCtx := errgroup.WithContext(ctx)
+// Upload 串行上传.
+func (c *client) Upload(ctx context.Context, files []string) ([]string, error) {
+	var res []string
 	for _, file := range files {
-		file := file
-		g.Go(func() error {
-			fd, err := os.Open(file)
-			if err != nil {
-				return err
-			}
-			content, err := ioutil.ReadAll(fd)
-			if err != nil {
-				return err
-			}
-			content = append(content, []byte(file)...)
-			encrypt := md5.New()
-			MD5Str := hex.EncodeToString(encrypt.Sum(content))
-			fileSuffix := path.Ext(file)
-			name := fmt.Sprintf("%s%s.%s", constant.COSRelativePath, MD5Str, fileSuffix)
-			rsp, err := c.Object.Put(subCtx, name, fd, nil)
-			return err
-		})
+		fd, err := os.Open(file)
+		if err != nil {
+			return nil, err
+		}
+		content, err := ioutil.ReadAll(fd)
+		tmpFD := bytes.NewReader(content)
+		if err != nil {
+			return nil, err
+		}
+		fileSuffix := path.Ext(file)
+		content = append(content, []byte(fileSuffix)...)
+		MD5Str := fmt.Sprintf("%x", md5.Sum(content))
+		name := fmt.Sprintf("%s%s%s", constant.COSRelativePath, MD5Str, fileSuffix)
+		_, err = c.Client.Object.Put(ctx, name, tmpFD, nil)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, fmt.Sprintf(constant.ImgURLTemplate, MD5Str, fileSuffix))
 	}
-	return g.Wait()
+	return res, nil
 }

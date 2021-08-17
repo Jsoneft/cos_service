@@ -16,4 +16,8 @@ const (
 
 	// COSRelativePath COS服务 上传路径
 	COSRelativePath = "img/markdownImg/"
+
+	// ImgURLTemplate 图像网页链接模板
+	ImgURLTemplate = "https://jarviszuo-tencent-img-1302316844.cos.ap-chengdu.myqcloud.com/" +
+		COSRelativePath + "%v%s"
 )
