@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
 	"github.com/tencentyun/cos-go-sdk-v5"
@@ -31,18 +30,16 @@ func Test_client_Upload(t *testing.T) {
 				files: []string{"/Users/jason/Downloads/iShot2021-08-18 02.25.11.png"},
 			},
 			wantErr: false,
+			want:    nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := New()
-			got, err := c.Upload(tt.args.ctx, tt.args.files)
+			_, err := c.Upload(tt.args.ctx, tt.args.files)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Upload() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Upload() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
