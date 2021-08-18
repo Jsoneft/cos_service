@@ -9,7 +9,7 @@ This is a project is a simple COS used for image host.
 
 The usage is shown below
 
-<img src="https://jarviszuo-tencent-img-1302316844.cos.ap-chengdu.myqcloud.com/img/markdownImg/7cdacb47f0487ec96f2cc4140a81024f.gif" alt="ab30a2e90f14888b691756cd3df7df34.gif" style="zoom:50%;" />
+![ab30a2e90f14888b691756cd3df7df3](https://user-images.githubusercontent.com/50447410/129954441-38b5b2e1-f508-425a-bf63-65bb27b2500d.gif)
 
 
 
